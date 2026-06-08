@@ -1,0 +1,10 @@
+.DS_Store
+.build/
+.swiftpm/
+*.xcodeproj
+DerivedData/
+build/
+AlertMe.app/
+
+# Local user config (may contain OAuth client id/secret)
+config.json
