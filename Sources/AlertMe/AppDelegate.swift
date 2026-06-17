@@ -104,7 +104,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func testAnimation() {
-        overlay.show()
+        overlay.show(message: OverlayController.meetingMessage(title: "Test Meeting"))
     }
 
     @objc private func openConfig() {

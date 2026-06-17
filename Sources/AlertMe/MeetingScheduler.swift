@@ -61,21 +61,22 @@ final class MeetingScheduler {
 
             if delay <= 0 {
                 // Meeting is starting right now (within this poll); fire immediately.
-                fire(key: key)
+                fire(key: key, title: event.title)
             } else {
+                let title = event.title
                 let timer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
-                    Task { @MainActor in self?.fire(key: key) }
+                    Task { @MainActor in self?.fire(key: key, title: title) }
                 }
                 armedTimers[key] = timer
             }
         }
     }
 
-    private func fire(key: String) {
+    private func fire(key: String, title: String) {
         firedKeys.insert(key)
         armedTimers[key]?.invalidate()
         armedTimers[key] = nil
-        overlay.show()
+        overlay.show(message: OverlayController.meetingMessage(title: title))
     }
 
     private func timeString(_ date: Date) -> String {

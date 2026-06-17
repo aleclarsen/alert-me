@@ -15,14 +15,17 @@ final class OverlayController {
     /// Distance from the top of the screen to the top of the train, in points.
     private let topMargin: CGFloat = 24
 
-    nonisolated static let meetingMessage = "Choo choo! You have a meeting starting soon!"
     nonisolated static let welcomeMessage = "All aboard! I'll whistle when a meeting pulls in today! 🚂"
+
+    nonisolated static func meetingMessage(title: String) -> String {
+        "Choo choo! \"\(title)\" is pulling into the station soon!"
+    }
 
     init(config: Config) {
         self.config = config
     }
 
-    func show(message: String = OverlayController.meetingMessage) {
+    func show(message: String) {
         // Don't stack overlays if one is already on screen.
         guard window == nil else { return }
         guard let screen = NSScreen.main else { return }
