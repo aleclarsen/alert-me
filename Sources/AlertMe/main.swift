@@ -4,7 +4,7 @@ import Lottie
 // Headless self-test: verifies the bundled animation resolves and parses,
 // without launching the menu-bar UI. Used by CI / `swift run AlertMe --check`.
 if CommandLine.arguments.contains("--check") {
-    guard let path = Bundle.module.path(forResource: "default-animation", ofType: "json") else {
+    guard let path = Bundle.module.path(forResource: "train-animation", ofType: "json") else {
         print("FAIL: bundled animation not found via Bundle.module")
         exit(1)
     }

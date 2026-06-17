@@ -16,7 +16,7 @@ let package = Package(
                 .product(name: "Lottie", package: "lottie-ios")
             ],
             resources: [
-                .copy("Resources/default-animation.json")
+                .copy("Resources/train-animation.json")
             ]
         )
     ]

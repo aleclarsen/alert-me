@@ -132,8 +132,9 @@ your own, set `animationPath` in the config to any `.lottie`-style JSON file:
 
 Free, openly-licensed animations are available at
 [LottieFiles](https://lottiefiles.com/) (check each file's license). The bundled
-default (`Sources/AlertMe/Resources/default-animation.json`) is a simple pulsing
-ring authored for this project and is MIT-licensed.
+default (`Sources/AlertMe/Resources/train-animation.json`) is a little steam
+train that chugs across the top of the screen, authored for this project and
+MIT-licensed.
 
 Use **Test animation** in the menu to preview the current animation any time.
 
