@@ -15,6 +15,12 @@ let package = Package(
             dependencies: [
                 .product(name: "Lottie", package: "lottie-ios")
             ],
+            // AppIcon.icns is consumed only by scripts/build-app.sh, which copies it
+            // straight into the .app's Contents/Resources. Exclude it here so SwiftPM
+            // doesn't warn about an undeclared resource (it's never loaded at runtime).
+            exclude: [
+                "Resources/AppIcon.icns"
+            ],
             resources: [
                 .copy("Resources/train-animation.json")
             ]

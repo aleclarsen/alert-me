@@ -38,6 +38,11 @@ cp "${BIN_PATH}/${APP_NAME}" "${APP_DIR}/Contents/MacOS/${APP_NAME}"
 # .app anyway. Keeping the .app free of nested bundles lets codesign succeed.
 cp "Sources/${APP_NAME}/Resources/train-animation.json" "${APP_DIR}/Contents/Resources/"
 
+# App icon shown in Finder / Launchpad / Applications. (This is a menu-bar agent
+# with no Dock icon, so the .icns only surfaces in the filesystem UI.) Regenerate
+# the artwork with ./scripts/make-icon.sh.
+cp "Sources/${APP_NAME}/Resources/AppIcon.icns" "${APP_DIR}/Contents/Resources/"
+
 cat > "${APP_DIR}/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -51,6 +56,8 @@ cat > "${APP_DIR}/Contents/Info.plist" <<PLIST
     <string>${BUNDLE_ID}</string>
     <key>CFBundleExecutable</key>
     <string>${APP_NAME}</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>

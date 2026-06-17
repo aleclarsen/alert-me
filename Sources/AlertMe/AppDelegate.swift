@@ -47,7 +47,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "bell.badge", accessibilityDescription: "alert-me")
+            // Side-profile train matches the app icon. It needs macOS 14, so fall
+            // back to tram.fill (available on the macOS 13 target) when unavailable.
+            button.image = NSImage(systemSymbolName: "train.side.front.car", accessibilityDescription: "alert-me")
+                ?? NSImage(systemSymbolName: "tram.fill", accessibilityDescription: "alert-me")
         }
     }
 
