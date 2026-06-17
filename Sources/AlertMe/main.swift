@@ -7,12 +7,13 @@ import Lottie
 // Force-populating it here silences "Cannot index window tabs due to missing main
 // bundle identifier" and ensures any code that reads Bundle.main.bundleIdentifier
 // gets the correct value.
-if Bundle.main.bundleIdentifier == nil {
+if Bundle.main.bundleIdentifier == nil,
+   let infoDict = CFBundleGetInfoDictionary(CFBundleGetMainBundle()) {
     // Bundle.infoDictionary is read-only, but the underlying CFBundle dictionary
-    // is a mutable CFDictionary that we can write into directly via the CF API.
-    let infoDict = CFBundleGetInfoDictionary(CFBundleGetMainBundle())
-    let mutableInfoDict = infoDict as! NSMutableDictionary
-    mutableInfoDict[kCFBundleIdentifierKey] = "com.alertme.app"
+    // is a mutable CFDictionary toll-free bridged to NSMutableDictionary. The
+    // bridge is to the immutable class, so reinterpret the pointer directly.
+    let mutableInfoDict = unsafeBitCast(infoDict, to: NSMutableDictionary.self)
+    mutableInfoDict[kCFBundleIdentifierKey as String] = "com.alertme.app"
 }
 
 // Headless self-test: verifies the bundled animation resolves and parses,
