@@ -54,5 +54,8 @@ cat > "${APP_DIR}/Contents/Info.plist" <<PLIST
 </plist>
 PLIST
 
+echo "==> Ad-hoc codesigning…"
+codesign --force --deep --sign - "${APP_DIR}"
+
 echo "==> Done: ${APP_DIR}"
 echo "    Run it with: open ${APP_DIR}"
