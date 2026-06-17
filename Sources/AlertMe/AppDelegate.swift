@@ -24,6 +24,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupStatusItem()
         refreshMenu()
 
+        // initial user greeting
+        overlay.show(message: OverlayController.welcomeMessage)
+
         Task {
             if await auth.isSignedIn {
                 scheduler.start()

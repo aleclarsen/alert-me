@@ -14,14 +14,15 @@ final class OverlayController {
     private let travelSpeed: CGFloat = 210
     /// Distance from the top of the screen to the top of the train, in points.
     private let topMargin: CGFloat = 24
-    /// Message that trails behind the train as it crosses the screen.
-    private let message = "Choo choo! You have a meeting starting soon!"
+
+    nonisolated static let meetingMessage = "Choo choo! You have a meeting starting soon!"
+    nonisolated static let welcomeMessage = "All aboard! I'll whistle when a meeting pulls in today! 🚂"
 
     init(config: Config) {
         self.config = config
     }
 
-    func show() {
+    func show(message: String = OverlayController.meetingMessage) {
         // Don't stack overlays if one is already on screen.
         guard window == nil else { return }
         guard let screen = NSScreen.main else { return }
@@ -56,7 +57,7 @@ final class OverlayController {
         animationView.wantsLayer = true
 
         // The message rides behind (to the right of) the train.
-        let textLayer = makeMessageLayer(trainHeight: trainHeight, scale: screen.backingScaleFactor)
+        let textLayer = makeMessageLayer(message: message, trainHeight: trainHeight, scale: screen.backingScaleFactor)
         let gap: CGFloat = 24
 
         // A "convoy" view holds the train and the trailing text so they move
@@ -122,7 +123,7 @@ final class OverlayController {
     /// shadow so it stays readable over any wallpaper. A text layer (rather than
     /// an NSTextField) renders reliably inside this transparent, non-key,
     /// click-through overlay window and rides along with the convoy's layer.
-    private func makeMessageLayer(trainHeight: CGFloat, scale: CGFloat) -> CATextLayer {
+    private func makeMessageLayer(message: String, trainHeight: CGFloat, scale: CGFloat) -> CATextLayer {
         let fontSize = max(20, trainHeight * 0.26)
         let font = NSFont.systemFont(ofSize: fontSize, weight: .bold)
         let size = (message as NSString).size(withAttributes: [.font: font])
