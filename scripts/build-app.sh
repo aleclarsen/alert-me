@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # Builds AlertMe.app — a self-contained menu-bar app bundle (no Dock icon).
+#
+# Usage:
+#   ./scripts/build-app.sh            Build + sign the .app in the repo folder.
+#   ./scripts/build-app.sh --install  Also copy it to /Applications and launch it.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -7,6 +11,14 @@ cd "$(dirname "$0")/.."
 APP_NAME="AlertMe"
 BUNDLE_ID="com.alertme.app"
 APP_DIR="${APP_NAME}.app"
+
+INSTALL=false
+for arg in "$@"; do
+  case "$arg" in
+    --install) INSTALL=true ;;
+    *) echo "Unknown argument: $arg" >&2; exit 2 ;;
+  esac
+done
 
 echo "==> Building release binary…"
 swift build -c release
@@ -64,4 +76,18 @@ echo "==> Codesigning with identity: ${IDENTITY}"
 codesign --force --sign "${IDENTITY}" "${APP_DIR}"
 
 echo "==> Done: ${APP_DIR}"
-echo "    Run it with: open ${APP_DIR}"
+
+if [ "${INSTALL}" = true ]; then
+  DEST="/Applications/${APP_DIR}"
+  echo "==> Installing to ${DEST}…"
+  # Quit a running copy so we can replace it cleanly, then swap in the new build.
+  osascript -e 'tell application "AlertMe" to quit' >/dev/null 2>&1 || true
+  rm -rf "${DEST}"
+  cp -R "${APP_DIR}" "${DEST}"
+  echo "==> Launching…"
+  open "${DEST}"
+  echo "    Installed and launched: ${DEST}"
+else
+  echo "    Run it with: open ${APP_DIR}"
+  echo "    Or install to /Applications with: ./scripts/build-app.sh --install"
+fi
