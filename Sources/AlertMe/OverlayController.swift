@@ -153,10 +153,22 @@ final class OverlayController {
            let animation = LottieAnimation.filepath(path) {
             return LottieAnimationView(animation: animation)
         }
-        if let bundled = Bundle.module.path(forResource: "train-animation", ofType: "json"),
+        if let bundled = AnimationBundle.defaultAnimationPath,
            let animation = LottieAnimation.filepath(bundled) {
             return LottieAnimationView(animation: animation)
         }
         return LottieAnimationView()
+    }
+}
+
+/// Resolves the bundled default animation. In a packaged `.app` the JSON lives in
+/// `Contents/Resources` (found via `Bundle.main`); in a `swift run` dev build it
+/// lives in the SwiftPM resource bundle (found via `Bundle.module`).
+enum AnimationBundle {
+    static let resourceName = "train-animation"
+
+    static var defaultAnimationPath: String? {
+        Bundle.main.path(forResource: resourceName, ofType: "json")
+            ?? Bundle.module.path(forResource: resourceName, ofType: "json")
     }
 }

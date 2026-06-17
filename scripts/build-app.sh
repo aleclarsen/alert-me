@@ -19,11 +19,12 @@ mkdir -p "${APP_DIR}/Contents/Resources"
 
 cp "${BIN_PATH}/${APP_NAME}" "${APP_DIR}/Contents/MacOS/${APP_NAME}"
 
-# SPM emits resource bundles (e.g. AlertMe_AlertMe.bundle) next to the binary.
-# Bundle.module resolves them relative to the executable, so copy them alongside it.
-for b in "${BIN_PATH}"/*.bundle; do
-  [ -e "$b" ] && cp -R "$b" "${APP_DIR}/Contents/MacOS/"
-done
+# Ship the animation as a plain resource in Contents/Resources, loaded at runtime
+# via Bundle.main. We deliberately do NOT copy SwiftPM's *.bundle directories:
+# they have no Info.plist, so codesign rejects them ("bundle format unrecognized"),
+# and SwiftPM's generated Bundle.module accessor wouldn't find them inside the
+# .app anyway. Keeping the .app free of nested bundles lets codesign succeed.
+cp "Sources/${APP_NAME}/Resources/train-animation.json" "${APP_DIR}/Contents/Resources/"
 
 cat > "${APP_DIR}/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -54,8 +55,13 @@ cat > "${APP_DIR}/Contents/Info.plist" <<PLIST
 </plist>
 PLIST
 
-echo "==> Ad-hoc codesigning…"
-codesign --force --deep --sign - "${APP_DIR}"
+# Sign with a stable identity if provided (so the Keychain "Always Allow" for the
+# OAuth token persists across rebuilds), otherwise fall back to ad-hoc ("-").
+# Set one with, e.g.:  CODESIGN_IDENTITY="My Dev Cert" ./scripts/build-app.sh
+# The .app has no nested bundles, so a plain signature seals everything cleanly.
+IDENTITY="${CODESIGN_IDENTITY:--}"
+echo "==> Codesigning with identity: ${IDENTITY}"
+codesign --force --sign "${IDENTITY}" "${APP_DIR}"
 
 echo "==> Done: ${APP_DIR}"
 echo "    Run it with: open ${APP_DIR}"

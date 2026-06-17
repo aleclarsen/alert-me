@@ -19,8 +19,8 @@ if Bundle.main.bundleIdentifier == nil,
 // Headless self-test: verifies the bundled animation resolves and parses,
 // without launching the menu-bar UI. Used by CI / `swift run AlertMe --check`.
 if CommandLine.arguments.contains("--check") {
-    guard let path = Bundle.module.path(forResource: "train-animation", ofType: "json") else {
-        print("FAIL: bundled animation not found via Bundle.module")
+    guard let path = AnimationBundle.defaultAnimationPath else {
+        print("FAIL: bundled animation not found via Bundle.main or Bundle.module")
         exit(1)
     }
     guard LottieAnimation.filepath(path) != nil else {
