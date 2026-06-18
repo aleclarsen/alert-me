@@ -24,7 +24,7 @@ struct Config: Codable {
         clientSecret: nil,
         scopes: ["https://www.googleapis.com/auth/calendar.readonly"],
         pollIntervalSeconds: 300,
-        leadTimeSeconds: 0,
+        leadTimeSeconds: 180,
         animationPath: nil
     )
 }
