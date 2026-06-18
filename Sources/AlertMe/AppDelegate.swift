@@ -4,6 +4,7 @@ import AppKit
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private let statusMenuItem = NSMenuItem(title: "Starting…", action: nil, keyEquivalent: "")
+    private let arrivedMenuItem = NSMenuItem(title: "Trains arrived today: —", action: nil, keyEquivalent: "")
 
     private var config = Config.default
     private var auth: GoogleAuth!
@@ -19,6 +20,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         scheduler = MeetingScheduler(calendar: calendar, overlay: overlay, config: config)
         scheduler.onStatus = { [weak self] text in
             Task { @MainActor in self?.statusMenuItem.title = text }
+        }
+        scheduler.onArrived = { [weak self] count in
+            Task { @MainActor in self?.arrivedMenuItem.title = "Trains arrived today: \(count)" }
         }
 
         setupStatusItem()
@@ -58,6 +62,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let menu = NSMenu()
         statusMenuItem.isEnabled = false
         menu.addItem(statusMenuItem)
+        arrivedMenuItem.isEnabled = false
+        menu.addItem(arrivedMenuItem)
         menu.addItem(.separator())
 
         Task {

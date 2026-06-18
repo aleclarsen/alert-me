@@ -7,22 +7,41 @@ struct CalendarEvent: Identifiable {
 }
 
 /// Thin wrapper over the Google Calendar v3 REST API. Read-only: it only lists
-/// upcoming events on the user's primary calendar.
+/// events on the user's primary calendar.
 struct CalendarService {
     let auth: GoogleAuth
 
     /// Returns timed events on the primary calendar starting within the next `window` seconds.
     func upcomingEvents(within window: TimeInterval) async throws -> [CalendarEvent] {
+        let now = Date()
+        let events = try await fetchEvents(timeMin: now, timeMax: now.addingTimeInterval(window))
+        // Google's timeMin filters on event END time, so meetings already in
+        // progress come back too. We only want events that haven't started yet,
+        // so the overlay fires as a pre-meeting heads-up rather than late.
+        return events.filter { $0.start >= now }
+    }
+
+    /// Counts timed meetings that have already started earlier today — the
+    /// "trains" that have already arrived. View-only; never arms the overlay.
+    func pastMeetingsToday() async throws -> Int {
+        let now = Date()
+        let startOfDay = Calendar.current.startOfDay(for: now)
+        let events = try await fetchEvents(timeMin: startOfDay, timeMax: now)
+        return events.filter { $0.start >= startOfDay && $0.start <= now }.count
+    }
+
+    /// Lists timed events whose Google-side window overlaps [timeMin, timeMax].
+    /// All-day events are dropped here; callers filter further by start time.
+    private func fetchEvents(timeMin: Date, timeMax: Date) async throws -> [CalendarEvent] {
         let token = try await auth.validAccessToken()
 
-        let now = Date()
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
 
         var comps = URLComponents(string: "https://www.googleapis.com/calendar/v3/calendars/primary/events")!
         comps.queryItems = [
-            URLQueryItem(name: "timeMin", value: formatter.string(from: now)),
-            URLQueryItem(name: "timeMax", value: formatter.string(from: now.addingTimeInterval(window))),
+            URLQueryItem(name: "timeMin", value: formatter.string(from: timeMin)),
+            URLQueryItem(name: "timeMax", value: formatter.string(from: timeMax)),
             URLQueryItem(name: "singleEvents", value: "true"),
             URLQueryItem(name: "orderBy", value: "startTime"),
             URLQueryItem(name: "maxResults", value: "50")
@@ -42,10 +61,6 @@ struct CalendarService {
             // Only timed events have start.dateTime; all-day events (start.date) are skipped.
             guard let startString = item.start.dateTime,
                   let start = formatter.date(from: startString) else { return nil }
-            // Google's timeMin filters on event END time, so meetings already in
-            // progress come back too. We only want events that haven't started yet,
-            // so the overlay fires as a pre-meeting heads-up rather than late.
-            guard start >= now else { return nil }
             return CalendarEvent(id: item.id, title: item.summary ?? "(no title)", start: start)
         }
     }

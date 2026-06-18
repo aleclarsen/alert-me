@@ -15,6 +15,8 @@ final class MeetingScheduler {
 
     /// Reports human-readable status changes for the menu bar.
     var onStatus: ((String) -> Void)?
+    /// Reports the count of meetings that have already started today ("trains arrived").
+    var onArrived: ((Int) -> Void)?
 
     init(calendar: CalendarService, overlay: OverlayController, config: Config) {
         self.calendar = calendar
@@ -46,6 +48,11 @@ final class MeetingScheduler {
                 onStatus?("Synced \(events.count) upcoming • \(timeString(Date()))")
             } catch {
                 onStatus?("Sync error: \(error.localizedDescription)")
+            }
+
+            // Best-effort: a failure here shouldn't disturb the sync status above.
+            if let arrived = try? await calendar.pastMeetingsToday() {
+                onArrived?(arrived)
             }
         }
     }
