@@ -42,6 +42,10 @@ struct CalendarService {
             // Only timed events have start.dateTime; all-day events (start.date) are skipped.
             guard let startString = item.start.dateTime,
                   let start = formatter.date(from: startString) else { return nil }
+            // Google's timeMin filters on event END time, so meetings already in
+            // progress come back too. We only want events that haven't started yet,
+            // so the overlay fires as a pre-meeting heads-up rather than late.
+            guard start >= now else { return nil }
             return CalendarEvent(id: item.id, title: item.summary ?? "(no title)", start: start)
         }
     }
